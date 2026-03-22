@@ -1,21 +1,22 @@
+# Docker Compose for local development
+# For now, we use Supabase Cloud instead of local Postgres
+# Keeping this here for future when we add local services (Redis, etc)
+
 version: '3.8'
 
 services:
-  # PostgreSQL for local Supabase (optional)
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # Postgres is managed by Supabase Cloud
+  # To use local Postgres later, uncomment below and update .env.local
 
-volumes:
-  postgres-data:
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: postgres
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+
+# volumes:
+#   postgres-data:

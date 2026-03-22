@@ -18,83 +18,52 @@ A modern, multi-tenant wedding planning platform built with Next.js, Supabase, a
 - **Frontend:** Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS
 - **Backend:** Supabase (Auth, PostgreSQL, Storage)
 - **Payments:** Stripe
-- **Dev:** Docker Compose for local Supabase
+- **Database:** PostgreSQL (managed via Supabase)
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+**See [SETUP.md](./SETUP.md) for detailed local setup instructions.**
 
-- Node.js 18+
-- Docker & Docker Compose
-- Supabase account (or local setup via Docker)
-
-### Local Development
-
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/yourusername/wedding-planner.git
-   cd wedding-planner
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start local Supabase (optional)**
-   ```bash
-   docker-compose up -d
-   # Access Supabase Studio at http://localhost:3001
-   ```
-
-4. **Set up environment**
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your Supabase/Stripe keys
-   ```
-
-5. **Run development server**
-   ```bash
-   npm run dev
-   ```
-   Visit http://localhost:3000
-
-### Database Schema
-
-See `supabase/migrations/` for schema details.
-
-### API Routes
-
-- `/api/auth/*` - Supabase Auth endpoints
-- `/api/guests/*` - Guest list operations
-- `/api/stripe/*` - Payment webhooks
+TL;DR:
+1. Create a Supabase project at https://app.supabase.com
+2. Get your API keys and update `.env.local`
+3. Run the SQL migration from `supabase/migrations/001_initial_schema.sql`
+4. `npm install && npm run dev`
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (auth)/          # Auth routes (sign up, login)
-│   ├── (dashboard)/     # Protected routes
-│   ├── (guest)/         # Public guest pages
-│   ├── api/             # API routes
+│   ├── (auth)/              # Sign up, login routes
+│   ├── (dashboard)/         # Protected routes (dashboard, guest list)
+│   ├── (guest)/             # Public guest self-entry page
+│   ├── api/                 # API routes (stripe webhooks, etc)
 │   ├── layout.tsx
 │   ├── globals.css
-│   └── page.tsx
+│   └── page.tsx             # Landing page
 ├── components/
-│   ├── ui/              # Reusable UI components
-│   └── features/        # Feature components
+│   └── ui/                  # Reusable UI components (Button, etc)
 ├── lib/
-│   ├── supabase.ts
-│   ├── stripe.ts
-│   └── utils.ts
+│   ├── supabase.ts          # Supabase client
+│   ├── stripe.ts            # Stripe initialization
+│   └── utils.ts             # Utility functions
 └── types/
     └── index.ts
 ```
 
+## Database Schema
+
+- **couples** — User couples with intent, partner names
+- **guests** — Guest list with RSVP status
+- RLS policies for multi-tenant isolation
+- Public policy for guest self-submissions
+
+See `supabase/migrations/001_initial_schema.sql` for details.
+
 ## Contributing
 
-This is a personal project for learning agentic workflows. PRs welcome!
+PRs welcome! This is a learning project for agentic workflows.
 
 ## License
 
