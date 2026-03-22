@@ -2,6 +2,32 @@
 
 ## Prerequisites
 
+- Node.js 18+
+- Docker & Docker Compose (optional, for local Supabase)
+
+## Option 1: Mock Mode (Fastest - No Setup)
+
+No database, no Docker. See the app instantly with stubbed data:
+
+```bash
+npm install
+npm run dev:mock
+```
+
+Visit http://localhost:3000. You can:
+- Sign up (fake auth)
+- View dashboard with Alice & Bob's wedding
+- See pre-populated guest list (5 mock guests)
+- Add/remove guests (in memory, resets on refresh)
+
+Perfect for seeing what the app looks like without wrestling with configuration.
+
+## Option 2: Local Supabase
+
+For a real database with auth:
+
+### Prerequisites
+
 - Docker & Docker Compose
 - Node.js 18+
 

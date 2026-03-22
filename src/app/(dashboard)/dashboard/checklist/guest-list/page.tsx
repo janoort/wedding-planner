@@ -32,15 +32,18 @@ export default function GuestListPage() {
     const loadGuests = async () => {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       if (userError || !user) {
-        router.push('/login')
-        return
+        // In mock mode, don't redirect
+        if (process.env.NEXT_PUBLIC_MOCK_MODE !== 'true') {
+          router.push('/login')
+          return
+        }
       }
 
       // Get couple ID
       const { data: couple } = await supabase
         .from('couples')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', user?.id || 'mock-user-1')
         .single()
 
       if (couple) {

@@ -22,6 +22,14 @@ A modern, multi-tenant wedding planning platform built with Next.js, Supabase, a
 
 ## Quick Start
 
+**Option 1: Mock Mode (No Setup Required)**
+```bash
+npm install
+npm run dev:mock
+```
+Visit http://localhost:3000 — app runs with stubbed data
+
+**Option 2: Local Supabase**
 ```bash
 # Start local Supabase (Postgres, Auth, REST API)
 docker-compose up -d
@@ -35,7 +43,6 @@ npm install
 # Start the app
 npm run dev
 ```
-
 Visit http://localhost:3000
 
 See [SETUP.md](./SETUP.md) for detailed instructions and troubleshooting.

@@ -16,14 +16,17 @@ export default function Dashboard() {
     const loadCouple = async () => {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       if (userError || !user) {
-        router.push('/login')
-        return
+        // In mock mode, don't redirect
+        if (process.env.NEXT_PUBLIC_MOCK_MODE !== 'true') {
+          router.push('/login')
+          return
+        }
       }
 
       const { data, error } = await supabase
         .from('couples')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user?.id || 'mock-user-1')
         .single()
 
       if (error) {
