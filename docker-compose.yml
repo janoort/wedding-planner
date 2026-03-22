@@ -7,6 +7,7 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "-c shared_preload_libraries=pgcrypto"
     ports:
       - "5432:5432"
     volumes:
@@ -16,6 +17,53 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  postgrest:
+    image: postgrest/postgrest:latest
+    ports:
+      - "3001:3000"
+    environment:
+      PGRST_DB_URI: postgres://postgres:postgres@postgres:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  auth:
+    image: supabase/gotrue:latest
+    ports:
+      - "9999:9999"
+    environment:
+      GOTRUE_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      GOTRUE_SITE_URL: http://localhost:3000
+      GOTRUE_URI_ALLOW_LIST: http://localhost:3000,http://localhost:3001
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      API_EXTERNAL_URL: http://localhost:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  studio:
+    image: supabase/studio:latest
+    ports:
+      - "3001:3000"
+    environment:
+      STUDIO_PG_INTERNAL_URL: postgres://postgres:postgres@postgres:5432/postgres
+      POSTGRES_PASSWORD: postgres
+      SUPABASE_URL: http://localhost:8000
+      SUPABASE_PUBLIC_URL: http://localhost:8000
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODAwMDAwMDAsImV4cCI6MTcwMDAwMDAwMH0.KLv1zOkKT8w7X_8hE9-LqlzLgvWwT4iB-l-4jO3a5IA
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4MDAwMDAwMCwiZXhwIjoxNzAwMDAwMDAwfQ.GC7G1e3XkKJOzDNQ0-FrEYDlC5qmKJyQQmNqUdLb4Cg
+      LOGFLARE_ENABLED: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data:
