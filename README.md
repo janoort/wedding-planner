@@ -24,10 +24,19 @@ A modern, multi-tenant wedding planning platform built with Next.js, Supabase, a
 
 **See [SETUP.md](./SETUP.md) for detailed local setup instructions.**
 
-TL;DR:
-1. Create a Supabase project at https://app.supabase.com
-2. Get your API keys and update `.env.local`
-3. Run the SQL migration from `supabase/migrations/001_initial_schema.sql`
+TL;DR (Local Supabase with Docker):
+```bash
+docker-compose up -d          # Start Supabase stack
+npm install
+npm run dev                   # Visit http://localhost:3000
+```
+
+Then run the SQL migration in Supabase Studio (http://localhost:3001).
+
+**Or use Supabase Cloud:**
+1. Create project at https://app.supabase.com
+2. Copy API keys to `.env.local`
+3. Run SQL migration in Supabase SQL Editor
 4. `npm install && npm run dev`
 
 ## Project Structure

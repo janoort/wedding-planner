@@ -1,75 +1,137 @@
 # Local Setup Guide
 
-## Option 1: Supabase Cloud (Recommended - Simplest)
+## Quick Start (Recommended)
 
-1. **Create a Supabase project**
-   - Go to https://app.supabase.com
-   - Click "New Project"
-   - Name it `wedding-planner`, set a password
-   - Wait for it to initialize (~2 min)
+Everything is pre-configured to run locally with Docker Compose. No cloud accounts needed.
 
-2. **Get your credentials**
-   - Go to Settings → API
-   - Copy `Project URL` → `NEXT_PUBLIC_SUPABASE_URL` in `.env.local`
-   - Copy `anon public key` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - Copy `service_role key` → `SUPABASE_SERVICE_ROLE_KEY`
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 18+
 
-3. **Run the database migration**
-   - In your Supabase project, go to SQL Editor
-   - Click "New Query"
-   - Copy contents of `supabase/migrations/001_initial_schema.sql`
-   - Paste and click "Run"
+### 1. Start Local Supabase
 
-4. **Start the app**
-   ```bash
-   npm install
-   npm run dev
-   ```
-   Visit http://localhost:3000
+```bash
+docker-compose up -d
+```
 
-## Option 2: Local Supabase (Via Docker)
+Wait for services to be ready (~30 seconds):
+```bash
+docker-compose logs -f postgres | grep "accepting connections"
+```
 
-Not recommended for now — the Docker setup requires the full Supabase stack which is complex. Use Cloud instead.
+### 2. Run Database Migration
+
+Once Postgres is ready, run the SQL migration:
+
+```bash
+docker exec wedding-planner-postgres-1 psql -U postgres -d postgres -f /dev/stdin < supabase/migrations/001_initial_schema.sql
+```
+
+Or manually via Supabase Studio:
+- Open http://localhost:3001 (Supabase Studio)
+- Go to SQL Editor
+- Create new query
+- Paste contents of `supabase/migrations/001_initial_schema.sql`
+- Click Run
+
+### 3. Install & Run App
+
+```bash
+npm install
+npm run dev
+```
+
+Visit http://localhost:3000
 
 ## Testing the App
 
-1. **Sign up** at http://localhost:3000/signup
-   - Fill in intent, partner names, email, password
-   - You'll be redirected to `/dashboard`
+### Sign Up
+- Go to http://localhost:3000/signup
+- Fill in: intent, partner names, email, password
+- Redirect to /dashboard
 
-2. **Guest List** at `/dashboard/checklist/guest-list`
-   - Upload a CSV or add guests manually
-   - Copy the public guest form link
-   - Test it at `/guest/[coupleId]`
+### Guest List
+- From dashboard, click "Guest List"
+- Upload CSV or add guests manually
+- Copy public guest form link
 
-3. **Public Guest Form** (no login needed)
-   - Accessible at the link from step 2
-   - Anyone can add themselves to the guest list
+### Public Guest Form
+- Visit the link (e.g., http://localhost:3000/guest/[coupleId])
+- Anyone can add themselves without login
+- RSVP yes/no
 
-## Env Variables Reference
+## Services Running
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_test_...
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+| Service | Port | Purpose |
+|---------|------|---------|
+| App (Next.js) | 3000 | Your wedding planner app |
+| Kong (API Gateway) | 8000 | Supabase API endpoint |
+| Supabase Studio | 3001 | Database UI & SQL editor |
+| PostgREST | 3001 | REST API (behind Kong) |
+| Auth (GoTrue) | 9999 | Auth service (behind Kong) |
+| Postgres | 5432 | Database |
+| Storage | 5000 | File storage (behind Kong) |
+| Realtime | 4000 | Subscriptions (behind Kong) |
+
+## Stopping Services
+
+```bash
+docker-compose down
 ```
 
-All `NEXT_PUBLIC_*` vars are exposed to the browser (safe for public keys).
-Service role and secret keys stay on the server.
+To reset data:
+```bash
+docker-compose down -v
+```
 
 ## Troubleshooting
 
-**"Could not read Username for github.com"**
-- Run `git push origin main` again or use `gh` CLI
+**Postgres not starting**
+```bash
+docker-compose logs postgres
+```
+
+**Port already in use**
+- Change port in docker-compose.yml (e.g., 8000 → 8001)
+- Update `.env.local` NEXT_PUBLIC_SUPABASE_URL
+
+**Migration failed**
+- Check Postgres is running: `docker-compose ps`
+- Check logs: `docker-compose logs postgres`
 
 **Auth not working**
-- Check `.env.local` has correct Supabase URL and keys
-- Verify the `couples` table exists in your Supabase project
+- Check Kong is running: `docker-compose ps`
+- Test API: `curl http://localhost:8000/auth/v1/settings`
+- Verify JWT tokens in .env.local
 
-**Public guest form 404**
-- Make sure you're using the exact coupleId from your dashboard
-- Check the URL format: `http://localhost:3000/guest/[coupleId]`
+**"Cannot GET /rest/v1/guests"**
+- The `guests` table needs to be created via migration
+- Check Studio SQL editor to confirm tables exist
+
+## Environment Variables
+
+Pre-configured in `.env.local` to work with local Supabase:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...  (pre-generated JWT)
+SUPABASE_SERVICE_ROLE_KEY=eyJ...      (pre-generated JWT)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+All JWT tokens are pre-generated for local dev (not secure, only for testing).
+
+## Using Supabase Cloud Instead (Optional)
+
+If you want to use cloud instead:
+
+1. Create project at https://app.supabase.com
+2. Get API keys from Settings → API
+3. Update `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+   SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
+   ```
+4. Run migration in Supabase SQL Editor
+5. `npm run dev`
