@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  supabase:
+    image: supabase/postgres:15.1.0.118
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  vector:
+    image: vectordotdev/vector:0.34.0-debian
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+    command: -c /etc/vector/vector.toml
+    ports:
+      - "9598:9598"
+
+  supabase-studio:
+    image: supabase/studio:20240101-6ddf288
+    ports:
+      - "3001:3000"
+    environment:
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: http://localhost:8000
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODAwMDAwMDAsImV4cCI6MTcwMDAwMDAwMH0.KLv1zOkKT8w7X_8hE9-LqlzLgvWwT4iB-l-4jO3a5IA
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4MDAwMDAwMCwiZXhwIjoxNzAwMDAwMDAwfQ.GC7G1e3XkKJOzDNQ0-FrEYDlC5qmKJyQQmNqUdLb4Cg
+
+volumes:
+  postgres-data:
